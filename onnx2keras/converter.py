@@ -36,7 +36,7 @@ def onnx_node_attributes_to_dict(args):
     return {arg.name: onnx_attribute_to_dict(arg) for arg in args}
 
 
-def onnx_to_keras(onnx_model, input_names,
+def onnx_to_keras(onnx_model, input_names, batch_size=None,
                   input_shapes=None, name_policy=None, verbose=True, change_ordering=False):
     """
     Convert ONNX graph to Keras model format
@@ -106,7 +106,7 @@ def onnx_to_keras(onnx_model, input_names,
                     input_shape = [i.dim_value for i in onnx_i.type.tensor_type.shape.dim][1:]
 
                 layers[input_name] = keras.layers.InputLayer(
-                    input_shape=input_shape, name=input_name
+                    input_shape=input_shape, name=input_name, batch_size=batch_size
                 ).output
 
                 keras_inputs.append(layers[input_name])
@@ -216,7 +216,7 @@ def onnx_to_keras(onnx_model, input_names,
                 layer['config']['batch_input_shape'] = \
                     tuple(np.reshape(np.array(
                         [
-                            [None] +
+                            [batch_size] +
                             list(layer['config']['batch_input_shape'][2:][:]) +
                             [layer['config']['batch_input_shape'][1]]
                         ]), -1
